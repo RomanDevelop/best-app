@@ -1,49 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/log_in_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:my_riverpod/features/auth/presentation/providers/login_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final TextEditingController phoneController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(loginProvider);
     final notifier = ref.read(loginProvider.notifier);
+    final controller = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
-              controller: phoneController,
+              controller: controller,
+              keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
-                labelText: "Phone Number",
+                labelText: 'Phone Number',
               ),
             ),
             const SizedBox(height: 20),
-            if (state.isLoading)
-              const CircularProgressIndicator()
-            else
-              ElevatedButton(
-                onPressed: () {
-                  final phone = phoneController.text;
-                  notifier.login(phone);
-                },
-                child: const Text("Send OTP"),
-              ),
-            if (state.error != null) ...[
-              const SizedBox(height: 20),
-              Text(state.error!, style: const TextStyle(color: Colors.red)),
-            ]
+            state.isLoading
+                ? const CircularProgressIndicator()
+                : ElevatedButton(
+                    onPressed: () async {
+                      await notifier.login(controller.text);
+                      context.go('/otp');
+                    },
+                    child: const Text('Continue'),
+                  ),
           ],
         ),
       ),
