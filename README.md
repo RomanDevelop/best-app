@@ -1,4 +1,3 @@
-
 # My Riverpod App (OTP Auth Flow)
 
 This Flutter project demonstrates a clean and testable authentication flow using Riverpod (Notifier-based architecture) and Clean Architecture principles.
@@ -113,5 +112,4 @@ UI listens via ref.watch() → rebuilds on change
 
 ## ✍️ Author
 
-Developed and tested by [your name or GitHub].
-
+Developed and tested by RomanDevelop
