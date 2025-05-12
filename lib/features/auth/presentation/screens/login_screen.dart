@@ -31,7 +31,13 @@ class LoginScreen extends ConsumerWidget {
                 : ElevatedButton(
                     onPressed: () async {
                       await notifier.login(controller.text);
-                      context.go('/otp');
+                      context.go(
+                        '/otp',
+                        extra: {
+                          'phone': controller.text,
+                          'hash': 'abc123',
+                        },
+                      );
                     },
                     child: const Text('Continue'),
                   ),

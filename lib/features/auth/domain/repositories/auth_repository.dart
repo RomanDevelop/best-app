@@ -10,4 +10,6 @@ abstract class AuthRepository {
     String? otp,
     String? hash,
   );
+
+  Future<LoginDataModel> refreshToken(String refreshToken);
 }
