@@ -1,115 +1,95 @@
-# My Riverpod App (OTP Auth Flow)
 
-This Flutter project demonstrates a clean and testable authentication flow using Riverpod (Notifier-based architecture) and Clean Architecture principles.
+# Flutter Riverpod OTP Auth App (Best Practices)
 
-## 📦 Project Structure
+This project is a full-featured authentication flow built with Flutter and Riverpod using Clean Architecture principles. It includes login via phone number, OTP verification, secure token storage, and automatic token refreshing.
+
+## 🧱 Architecture Layers
 
 ```
 lib/
 ├── core/
-│   ├── common/
-│   │   └── providers/
-│   │       └── auth_notifier_provider.dart
-│   ├── error/
-│   │   └── app_exception.dart
+│   ├── common/                    # Shared providers, models
+│   ├── error/                     # AppException definitions
+│   ├── network/                   # Dio & AuthInterceptor
+│   └── services/                  # TokenStorageService (secure)
 ├── features/
 │   └── auth/
-│       ├── data/
-│       │   ├── datasources/
-│       │   │   └── auth_remote_datasource.dart
-│       │   ├── models/
-│       │   │   └── login_data_model.dart
-│       │   └── repositories_impl/
-│       │       └── auth_repository_impl.dart
-│       ├── domain/
-│       │   ├── entities/
-│       │   │   └── verify_otp_state.dart
-│       │   ├── repositories/
-│       │   │   └── auth_repository.dart
-│       │   └── usecases/
-│       │       └── verify_otp_usecase.dart
-│       └── presentation/
-│           └── providers/
-│               └── verify_otp_provider.dart
+│       ├── data/                  # datasources, models, impl
+│       ├── domain/                # entities, repositories, usecases
+│       └── presentation/          # Notifiers and Screens (UI)
 ```
 
 ---
 
 ## 🚀 Features
 
-- OTP-based login
-- Riverpod `NotifierProvider` state management
-- Clean separation of data, domain, and presentation
-- Full test coverage for UseCases and Providers
-- Error handling via `Either<AppException, T>` (Dartz)
+- ✅ Phone Number Login via OTP
+- ✅ Riverpod Notifier-based state management
+- ✅ Clean separation of layers (Data / Domain / Presentation)
+- ✅ Secure access/refresh token storage (flutter_secure_storage)
+- ✅ `authNotifier.init()` + auto-login on app start
+- ✅ Logout with token clear
+- ✅ Dio interceptor with automatic token refresh on 401
+- ✅ Fully testable UseCases and Notifiers
 
 ---
 
 ## 🧪 Testing
 
-### Unit tests
-
-Located in:
+Unit tests located in:
 
 ```
 test/
-├── features/
-│   ├── auth/
-│   │   ├── domain/usecases/verify_otp_usecase_test.dart
-│   │   └── presentation/providers/verify_otp_provider_test.dart
+└── features/
+    └── auth/
+        ├── domain/usecases/
+        └── presentation/providers/
 ```
 
-To run tests:
-
+Run all tests:
 ```bash
 flutter test
 ```
 
-You can run a single file:
+---
 
-```bash
-flutter test test/features/auth/presentation/providers/verify_otp_provider_test.dart
+## 🔁 Refresh Token Flow
+
+1. User logs in and receives access + refresh tokens
+2. Access token is sent with all API requests via `AuthInterceptor`
+3. If the server returns 401:
+   - interceptor calls `refreshToken(...)`
+   - new tokens are saved via `authNotifier.saveLogin(...)`
+   - original request is retried with the new token
+
+---
+
+## 🔄 Navigation Flow
+
+```
+/splash   → check saved session → /login or /home
+/login    → input phone → /otp
+/otp      → verify code → save tokens → /home
+/home     → view user info → logout → /login
 ```
 
 ---
 
-## 🧠 Technologies Used
+## 📦 Tech Stack
 
-- Riverpod (Notifier API)
-- Dartz for Either / Functional error handling
-- Flutter Secure Storage
+- Flutter 3.19+
+- Riverpod Notifier (no generator)
+- Dio for networking
+- GoRouter for navigation
 - Freezed + Build Runner
-- Dio HTTP client
-- Mocktail for testing
+- Dartz (Either, functional error handling)
+- flutter_secure_storage
+- mocktail + flutter_test
 
 ---
 
-## 🛠 Key Concepts
+## 📄 Author
 
-- `UseCase`: Executes logic and returns success or failure
-- `Notifier`: Holds state for the UI (loading, data, error)
-- `ProviderContainer`: Used for overriding providers in tests
-- `Mocktail`: Replaces real dependencies in unit tests
-- `Either`: Clean result wrapping for API calls
+Architecture based on `flutter_riverpod_best_practices` and extended for production use.
 
----
-
-## 🔄 State Flow Diagram
-
-```
-UI (Button press)
-  ↓
-verifyOtpProvider.notifier.verifyOTP()
-  ↓
-useCase.execute() — returns Either
-  ↓
-Notifier updates VerifyOtpState
-  ↓
-UI listens via ref.watch() → rebuilds on change
-```
-
----
-
-## ✍️ Author
-
-Developed and tested by RomanDevelop
+Built and extended by [your-name].
