@@ -1,4 +1,3 @@
-
 # Flutter Riverpod OTP Auth App (Best Practices)
 
 This project is a full-featured authentication flow built with Flutter and Riverpod using Clean Architecture principles. It includes login via phone number, OTP verification, secure token storage, and automatic token refreshing.
@@ -47,6 +46,7 @@ test/
 ```
 
 Run all tests:
+
 ```bash
 flutter test
 ```
@@ -92,4 +92,4 @@ flutter test
 
 Architecture based on `flutter_riverpod_best_practices` and extended for production use.
 
-Built and extended by [your-name].
+Built and extended by RomanDevelop.

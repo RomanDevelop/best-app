@@ -49,4 +49,11 @@ class AuthRepositoryImpl implements AuthRepository {
       return left(AppException.from(e));
     }
   }
+
+  @override
+  Future<LoginDataModel> refreshToken(String refreshToken) async {
+    final response = await remote.refresh(refreshToken);
+
+    return LoginDataModel.fromJson(response);
+  }
 }

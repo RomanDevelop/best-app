@@ -19,7 +19,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/otp',
-        builder: (context, state) => const OtpScreen(),
+        builder: (context, state) {
+          final args = state.extra as Map<String, String>;
+          final phone = args['phone']!;
+          final hash = args['hash']!;
+          return OtpScreen(phone: phone, hash: hash);
+        },
       ),
       GoRoute(
         path: '/home',

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../../core/common/providers/auth_notifier_provider.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:my_riverpod/core/common/providers/auth_notifier_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -9,45 +10,31 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authNotifierProvider);
-
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text("No user found")),
-      );
-    }
+    final notifier = ref.read(authNotifierProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home"),
+        title: const Text('Home'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await ref.read(authNotifierProvider.notifier).logout();
+              await notifier.logout();
               context.go('/login');
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Welcome!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Text("User ID: ${user.userId}"),
-            Text("Phone: ${user.phoneNumber}"),
-            Text("Access Token: ${user.accessToken}"),
-            const SizedBox(height: 20),
-            const Text(
-              "Это ваш личный кабинет. Здесь можно добавить функционал профиля, заказов, подписок и прочего.",
-            ),
-          ],
-        ),
+      body: Center(
+        child: user == null
+            ? const Text('No user data')
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('User ID: ${user.userId}'),
+                  Text('Phone: ${user.phoneNumber}'),
+                ],
+              ),
       ),
     );
   }
