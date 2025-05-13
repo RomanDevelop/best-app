@@ -33,17 +33,35 @@ class AuthRemoteDataSource {
   }
 
   Future<Map<String, dynamic>> refresh(String refreshToken) async {
-    final response = await dio.post(
-      'https://your.api.endpoint/auth/refresh', // замени на реальный URL
-      data: {
-        'refreshToken': refreshToken,
-      },
-    );
+    try {
+      final response = await dio.post(
+        'https://your.api.endpoint/refresh',
+        data: {'refreshToken': refreshToken},
+      );
 
-    if (response.statusCode == 200) {
-      return response.data as Map<String, dynamic>;
-    } else {
-      throw Exception('Failed to refresh token');
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw AppException.server('Failed to refresh token');
+      }
+    } catch (e) {
+      // ⬇️ вот это обязательно:
+      throw AppException.from(e);
     }
   }
+
+  // Future<Map<String, dynamic>> refresh(String refreshToken) async {
+  //   final response = await dio.post(
+  //     'https://your.api.endpoint/auth/refresh', // замени на реальный URL
+  //     data: {
+  //       'refreshToken': refreshToken,
+  //     },
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     return response.data as Map<String, dynamic>;
+  //   } else {
+  //     throw Exception('Failed to refresh token');
+  //   }
+  // }
 }

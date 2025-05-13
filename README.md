@@ -2,6 +2,8 @@
 
 This project is a full-featured authentication flow built with Flutter and Riverpod using Clean Architecture principles. It includes login via phone number, OTP verification, secure token storage, and automatic token refreshing.
 
+---
+
 ## 🧱 Architecture Layers
 
 ```
@@ -30,26 +32,35 @@ lib/
 - ✅ Logout with token clear
 - ✅ Dio interceptor with automatic token refresh on 401
 - ✅ Fully testable UseCases and Notifiers
+- ✅ CI: GitHub Actions with test automation
 
 ---
 
 ## 🧪 Testing
 
-Unit tests located in:
+### ✅ Covered:
 
-```
-test/
-└── features/
-    └── auth/
-        ├── domain/usecases/
-        └── presentation/providers/
-```
+- `login_usecase_test.dart`
+- `verify_otp_usecase_test.dart`
+- `auth_notifier_test.dart`
+- `login_provider_test.dart`
+- `verify_otp_provider_test.dart`
+- `auth_repository_test.dart`
+- `auth_remote_datasource_test.dart`
 
-Run all tests:
+### 🔜 Next (planned):
+
+- `auth_interceptor_test.dart`
+- Integration tests (navigation, flow, retry)
+- Code coverage badge
+
+### How to run:
 
 ```bash
 flutter test
 ```
+
+All tests run on push via GitHub Actions.
 
 ---
 
@@ -75,16 +86,35 @@ flutter test
 
 ---
 
+## 🔧 CI/CD
+
+GitHub Actions is configured to:
+
+- Check out code
+- Install dependencies
+- Run `flutter test`
+
+Config path: `.github/workflows/flutter_test.yml`
+
+---
+
 ## 📦 Tech Stack
 
-- Flutter 3.19+
-- Riverpod Notifier (no generator)
+- Flutter 3.19+ (tested with 3.27.3)
+- Riverpod (Notifier-based)
 - Dio for networking
 - GoRouter for navigation
 - Freezed + Build Runner
 - Dartz (Either, functional error handling)
 - flutter_secure_storage
 - mocktail + flutter_test
+- GitHub Actions (CI)
+
+---
+
+## 👨‍💻 Contributing
+
+Feel free to fork and extend. If you build on this and add production features — test coverage, push notifications, Firestore, etc. — feel free to open a PR or issue.
 
 ---
 
@@ -92,4 +122,4 @@ flutter test
 
 Architecture based on `flutter_riverpod_best_practices` and extended for production use.
 
-Built and extended by RomanDevelop.
+Built and extended by **[RomanDevelop](https://github.com/RomanDevelop)**.
