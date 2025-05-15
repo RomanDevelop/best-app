@@ -1,7 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorageService {
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage;
+
+  TokenStorageService([FlutterSecureStorage? storage])
+      : _storage = storage ?? const FlutterSecureStorage();
 
   Future<void> saveTokens({
     required String userId,
