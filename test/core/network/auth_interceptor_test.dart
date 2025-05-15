@@ -48,4 +48,20 @@ void main() {
     expect(requestOptions.headers['Authorization'], 'Bearer abc123');
     verify(() => handler.next(requestOptions)).called(1);
   });
+
+  test('should not add Authorization header if user is not authenticated', () {
+    // Мокаем отсутствие пользователя (не авторизован)
+    when(() => mockRef.read(authNotifierProvider)).thenReturn(null);
+    when(() => handler.next(any())).thenAnswer((_) {});
+
+    // Убедимся, что до вызова заголовок не существует
+    requestOptions.headers.remove('Authorization');
+
+    interceptor.onRequest(requestOptions, handler);
+
+    // Проверяем, что заголовок не добавлен
+    expect(requestOptions.headers.containsKey('Authorization'), isFalse);
+    // Проверяем, что handler.next вызван
+    verify(() => handler.next(requestOptions)).called(1);
+  });
 }

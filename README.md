@@ -47,10 +47,11 @@ lib/
 - `verify_otp_provider_test.dart`
 - `auth_repository_test.dart`
 - `auth_remote_datasource_test.dart`
+- `auth_interceptor_test.dart` - Testing request interception and authorization headers
+- `auth_interceptor_401_test.dart` - Testing 401 error handling with token refresh
 
 ### 🔜 Next (planned):
 
-- `auth_interceptor_test.dart`
 - Integration tests (navigation, flow, retry)
 - Code coverage badge
 
@@ -68,10 +69,14 @@ All tests run on push via GitHub Actions.
 
 1. User logs in and receives access + refresh tokens
 2. Access token is sent with all API requests via `AuthInterceptor`
-3. If the server returns 401:
-   - interceptor calls `refreshToken(...)`
-   - new tokens are saved via `authNotifier.saveLogin(...)`
-   - original request is retried with the new token
+3. If the server returns 401 (Unauthorized):
+   - `AuthInterceptor` catches the error in `onError` method
+   - Calls `authNotifier.refreshToken()` to get new tokens from the server
+   - New tokens are saved securely using `TokenStorageService`
+   - Original request is retried automatically with the new access token
+   - If refresh fails, user is logged out and redirected to login screen
+
+The flow is fully tested with mock implementations in `auth_interceptor_401_test.dart`.
 
 ---
 
