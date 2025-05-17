@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:my_riverpod/features/auth/presentation/screens/home_screen.dart';
+import 'package:my_riverpod/features/home/presentation/screens/home_screen.dart';
 import '../../../features/auth/presentation/screens/login_screen.dart';
 import '../../../features/auth/presentation/screens/otp_screen.dart';
 import '../../../features/auth/presentation/screens/splash_screen.dart';
