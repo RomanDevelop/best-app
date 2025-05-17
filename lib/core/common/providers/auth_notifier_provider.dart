@@ -24,22 +24,19 @@ class AuthNotifier extends Notifier<UserModel?> {
     );
 
     final storage = ref.read(tokenStorageServiceProvider);
-    await storage.saveTokens(
-      userId: userId,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-      phoneNumber: phoneNumber,
-    );
+    await storage.saveAccessToken(accessToken);
+    await storage.saveRefreshToken(refreshToken);
+    await storage.saveUserId(userId);
+    await storage.savePhoneNumber(phoneNumber);
   }
 
   Future<void> init() async {
     final storage = ref.read(tokenStorageServiceProvider);
-    final tokens = await storage.readTokens();
 
-    final accessToken = tokens['accessToken'];
-    final refreshToken = tokens['refreshToken'];
-    final userId = tokens['userId'];
-    final phoneNumber = tokens['phoneNumber'];
+    final accessToken = await storage.getAccessToken();
+    final refreshToken = await storage.getRefreshToken();
+    final userId = await storage.getUserId();
+    final phoneNumber = await storage.getPhoneNumber();
 
     if (accessToken != null &&
         refreshToken != null &&
@@ -59,16 +56,15 @@ class AuthNotifier extends Notifier<UserModel?> {
   Future<void> logout() async {
     state = null;
     final storage = ref.read(tokenStorageServiceProvider);
-    await storage.clear();
+    await storage.clearTokens(); // только access и refresh токены
   }
 
   Future<UserModel> refreshToken() async {
     final storage = ref.read(tokenStorageServiceProvider);
-    final tokens = await storage.readTokens();
 
-    final refreshToken = tokens['refreshToken'];
-    final userId = tokens['userId'];
-    final phoneNumber = tokens['phoneNumber'];
+    final refreshToken = await storage.getRefreshToken();
+    final userId = await storage.getUserId();
+    final phoneNumber = await storage.getPhoneNumber();
 
     if (refreshToken == null || userId == null || phoneNumber == null) {
       await logout();

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:my_riverpod/core/common/models/user_model.dart';
 import 'package:my_riverpod/core/common/providers/auth_notifier_provider.dart';
 import 'package:my_riverpod/core/services/token_storage_service.dart';
 import 'package:my_riverpod/core/services/token_storage_service_provider.dart';
@@ -23,12 +24,10 @@ void main() {
   });
 
   test('saveLogin() should store user and save tokens', () async {
-    when(() => mockStorage.saveTokens(
-          userId: any(named: 'userId'),
-          accessToken: any(named: 'accessToken'),
-          refreshToken: any(named: 'refreshToken'),
-          phoneNumber: any(named: 'phoneNumber'),
-        )).thenAnswer((_) async {});
+    when(() => mockStorage.saveAccessToken(any())).thenAnswer((_) async {});
+    when(() => mockStorage.saveRefreshToken(any())).thenAnswer((_) async {});
+    when(() => mockStorage.saveUserId(any())).thenAnswer((_) async {});
+    when(() => mockStorage.savePhoneNumber(any())).thenAnswer((_) async {});
 
     final notifier = container.read(authNotifierProvider.notifier);
 
@@ -44,16 +43,14 @@ void main() {
     expect(user?.userId, 'user123');
     expect(user?.accessToken, 'access123');
 
-    verify(() => mockStorage.saveTokens(
-          userId: 'user123',
-          accessToken: 'access123',
-          refreshToken: 'refresh123',
-          phoneNumber: '+1234567890',
-        )).called(1);
+    verify(() => mockStorage.saveAccessToken('access123')).called(1);
+    verify(() => mockStorage.saveRefreshToken('refresh123')).called(1);
+    verify(() => mockStorage.saveUserId('user123')).called(1);
+    verify(() => mockStorage.savePhoneNumber('+1234567890')).called(1);
   });
 
   test('logout() should clear user and storage', () async {
-    when(() => mockStorage.clear()).thenAnswer((_) async {});
+    when(() => mockStorage.clearTokens()).thenAnswer((_) async {});
 
     final notifier = container.read(authNotifierProvider.notifier);
     await notifier.logout();
@@ -61,27 +58,30 @@ void main() {
     final user = container.read(authNotifierProvider);
     expect(user, isNull);
 
-    verify(() => mockStorage.clear()).called(1);
+    verify(() => mockStorage.clearTokens()).called(1);
   });
 
   test('init() should restore user if tokens exist', () async {
-    when(() => mockStorage.readTokens()).thenAnswer((_) async => {
-          'userId': 'u1',
-          'accessToken': 'a1',
-          'refreshToken': 'r1',
-          'phoneNumber': '+380123456789',
-        });
+    when(() => mockStorage.getUserId()).thenAnswer((_) async => 'u1');
+    when(() => mockStorage.getAccessToken()).thenAnswer((_) async => 'a1');
+    when(() => mockStorage.getRefreshToken()).thenAnswer((_) async => 'r1');
+    when(() => mockStorage.getPhoneNumber())
+        .thenAnswer((_) async => '+380123456789');
 
     final notifier = container.read(authNotifierProvider.notifier);
     await notifier.init();
 
     final user = container.read(authNotifierProvider);
+    expect(user, isA<UserModel>());
     expect(user?.userId, 'u1');
     expect(user?.accessToken, 'a1');
   });
 
   test('init() should set state to null if tokens missing', () async {
-    when(() => mockStorage.readTokens()).thenAnswer((_) async => {});
+    when(() => mockStorage.getUserId()).thenAnswer((_) async => null);
+    when(() => mockStorage.getAccessToken()).thenAnswer((_) async => null);
+    when(() => mockStorage.getRefreshToken()).thenAnswer((_) async => null);
+    when(() => mockStorage.getPhoneNumber()).thenAnswer((_) async => null);
 
     final notifier = container.read(authNotifierProvider.notifier);
     await notifier.init();

@@ -1,37 +1,15 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+/// Интерфейс для хранения токенов и пользовательских данных
+abstract class TokenStorageService {
+  Future<void> saveAccessToken(String token);
+  Future<void> saveRefreshToken(String token);
+  Future<String?> getAccessToken();
+  Future<String?> getRefreshToken();
 
-class TokenStorageService {
-  final FlutterSecureStorage _storage;
+  Future<void> saveUserId(String userId);
+  Future<void> savePhoneNumber(String phoneNumber);
+  Future<String?> getUserId();
+  Future<String?> getPhoneNumber();
 
-  TokenStorageService([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
-
-  Future<void> saveTokens({
-    required String userId,
-    required String accessToken,
-    required String refreshToken,
-    required String phoneNumber,
-  }) async {
-    await _storage.write(key: 'userId', value: userId);
-    await _storage.write(key: 'accessToken', value: accessToken);
-    await _storage.write(key: 'refreshToken', value: refreshToken);
-    await _storage.write(key: 'phoneNumber', value: phoneNumber);
-  }
-
-  Future<Map<String, String?>> readTokens() async {
-    final userId = await _storage.read(key: 'userId');
-    final accessToken = await _storage.read(key: 'accessToken');
-    final refreshToken = await _storage.read(key: 'refreshToken');
-    final phoneNumber = await _storage.read(key: 'phoneNumber');
-    return {
-      'userId': userId,
-      'accessToken': accessToken,
-      'refreshToken': refreshToken,
-      'phoneNumber': phoneNumber,
-    };
-  }
-
-  Future<void> clear() async {
-    await _storage.deleteAll();
-  }
+  Future<void> clearTokens(); // удаляет только access/refresh
+  Future<void> clearAll(); // удаляет всё
 }
