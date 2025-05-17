@@ -1,6 +1,6 @@
 # Flutter Riverpod OTP Auth App (Best Practices)
 
-This project is a full-featured authentication flow built with Flutter and Riverpod using Clean Architecture principles. It includes login via phone number, OTP verification, secure token storage, and automatic token refreshing.
+This project is a full-featured authentication flow built with Flutter and Riverpod using Clean Architecture principles. It includes login via phone number, OTP verification, secure token storage, automatic token refreshing, and a home screen that loads data from an API.
 
 ---
 
@@ -14,10 +14,14 @@ lib/
 │   ├── network/                   # Dio & AuthInterceptor
 │   └── services/                  # TokenStorageService (secure)
 ├── features/
-│   └── auth/
-│       ├── data/                  # datasources, models, impl
-│       ├── domain/                # entities, repositories, usecases
-│       └── presentation/          # Notifiers and Screens (UI)
+│   ├── auth/
+│   │   ├── data/                  # datasources, models, impl
+│   │   ├── domain/                # entities, repositories, usecases
+│   │   └── presentation/          # Notifiers and Screens (UI)
+│   └── home/
+│       ├── data/                  # models, repository implementation
+│       ├── domain/                # usecases, repository interface
+│       └── presentation/          # notifier, UI widgets/screens
 ```
 
 ---
@@ -31,6 +35,7 @@ lib/
 - ✅ `authNotifier.init()` + auto-login on app start
 - ✅ Logout with token clear
 - ✅ Dio interceptor with automatic token refresh on 401
+- ✅ Modular `Home` feature with repository/usecase/notifier
 - ✅ Fully testable UseCases and Notifiers
 - ✅ CI: GitHub Actions with test automation
 
@@ -40,19 +45,17 @@ lib/
 
 ### ✅ Covered:
 
-- `login_usecase_test.dart`
-- `verify_otp_usecase_test.dart`
 - `auth_notifier_test.dart`
-- `login_provider_test.dart`
-- `verify_otp_provider_test.dart`
-- `auth_repository_test.dart`
-- `auth_remote_datasource_test.dart`
-- `auth_interceptor_test.dart` - Testing request interception and authorization headers
-- `auth_interceptor_401_test.dart` - Testing 401 error handling with token refresh
+- `auth_interceptor_test.dart` – adds Authorization header
+- `auth_interceptor_401_test.dart` – handles 401 and refreshToken flow
+- `token_storage_service_test.dart`
+- `token_storage_service_provider_test.dart`
+- `home_screen_test.dart` – widget tests: loading, error, data
 
 ### 🔜 Next (planned):
 
-- Integration tests (navigation, flow, retry)
+- Widget tests for `OtpScreen`, `LoginScreen`
+- Integration tests for routing and session restore
 - Code coverage badge
 
 ### How to run:
@@ -65,18 +68,37 @@ All tests run on push via GitHub Actions.
 
 ---
 
+## 🧭 Feature: `Home` Module
+
+The app shows a home screen after login, using a complete feature module:
+
+```
+HomeScreen → HomeNotifier → HomeUseCase → HomeRepositoryImpl → Dio
+```
+
+### ✅ Includes:
+
+- `HomeModel` with title/description
+- `HomeRepository` interface + `HomeRepositoryImpl` via Dio
+- `HomeUseCase.execute()`
+- `HomeNotifier` using `AsyncValue<List<HomeModel>>`
+- UI screen + `HomeTileWidget` with `ListView.builder`
+- Full widget test coverage (`home_screen_test.dart`)
+
+---
+
 ## 🔁 Refresh Token Flow
 
 1. User logs in and receives access + refresh tokens
 2. Access token is sent with all API requests via `AuthInterceptor`
 3. If the server returns 401 (Unauthorized):
-   - `AuthInterceptor` catches the error in `onError` method
-   - Calls `authNotifier.refreshToken()` to get new tokens from the server
-   - New tokens are saved securely using `TokenStorageService`
-   - Original request is retried automatically with the new access token
-   - If refresh fails, user is logged out and redirected to login screen
+   - `AuthInterceptor` catches the error in `onError()`
+   - Calls `authNotifier.refreshToken()` to get new tokens
+   - Saves new tokens via `TokenStorageService`
+   - Retries the original request with updated headers
+   - If refresh fails, user is logged out
 
-The flow is fully tested with mock implementations in `auth_interceptor_401_test.dart`.
+The flow is fully tested with mocks in `auth_interceptor_401_test.dart`.
 
 ---
 
@@ -86,7 +108,7 @@ The flow is fully tested with mock implementations in `auth_interceptor_401_test
 /splash   → check saved session → /login or /home
 /login    → input phone → /otp
 /otp      → verify code → save tokens → /home
-/home     → view user info → logout → /login
+/home     → view data → logout → /login
 ```
 
 ---
@@ -119,12 +141,12 @@ Config path: `.github/workflows/flutter_test.yml`
 
 ## 👨‍💻 Contributing
 
-Feel free to fork and extend. If you build on this and add production features — test coverage, push notifications, Firestore, etc. — feel free to open a PR or issue.
+Feel free to fork and extend. If you add new modules (e.g. Profile, Settings, Firestore) — PRs welcome!
 
 ---
 
 ## 📄 Author
 
-Architecture based on `flutter_riverpod_best_practices` and extended for production use.
+Architecture based on `flutter_riverpod_best_practices`.
 
 Built and extended by **[RomanDevelop](https://github.com/RomanDevelop)**.
