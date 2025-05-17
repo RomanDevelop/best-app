@@ -6,8 +6,14 @@ import 'package:my_riverpod/core/common/models/user_model.dart';
 import 'package:my_riverpod/core/common/providers/auth_notifier_provider.dart';
 import 'package:my_riverpod/core/services/token_storage_service.dart';
 import 'package:my_riverpod/core/services/token_storage_service_provider.dart';
+import 'package:my_riverpod/features/auth/data/models/login_data_model.dart';
+
+import 'package:my_riverpod/features/auth/data/repositories_impl/auth_repository_impl.dart';
+import 'package:my_riverpod/features/auth/domain/repositories/auth_repository.dart';
 
 class MockTokenStorageService extends Mock implements TokenStorageService {}
+
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late ProviderContainer container;
@@ -88,5 +94,47 @@ void main() {
 
     final user = container.read(authNotifierProvider);
     expect(user, isNull);
+  });
+
+  test('refreshToken() should call repository and update tokens', () async {
+    final mockAuthRepository = MockAuthRepository();
+    final mockStorage = MockTokenStorageService();
+
+    when(() => mockStorage.getRefreshToken())
+        .thenAnswer((_) async => 'refresh123');
+    when(() => mockStorage.getUserId()).thenAnswer((_) async => 'user123');
+    when(() => mockStorage.getPhoneNumber())
+        .thenAnswer((_) async => '+1234567890');
+
+    when(() => mockAuthRepository.refreshToken('refresh123')).thenAnswer(
+      (_) async => LoginDataModel(
+        accessToken: 'newAccess',
+        refreshToken: 'newRefresh',
+      ),
+    );
+
+    when(() => mockStorage.saveAccessToken(any())).thenAnswer((_) async {});
+    when(() => mockStorage.saveRefreshToken(any())).thenAnswer((_) async {});
+    when(() => mockStorage.saveUserId(any())).thenAnswer((_) async {});
+    when(() => mockStorage.savePhoneNumber(any())).thenAnswer((_) async {});
+
+    final testContainer = ProviderContainer(
+      overrides: [
+        tokenStorageServiceProvider.overrideWithValue(mockStorage),
+        authRepositoryProvider.overrideWithValue(mockAuthRepository),
+      ],
+    );
+
+    final notifier = testContainer.read(authNotifierProvider.notifier);
+    final result = await notifier.refreshToken();
+
+    expect(result.userId, 'user123');
+    expect(result.accessToken, 'newAccess');
+    expect(result.refreshToken, 'newRefresh');
+    expect(result.phoneNumber, '+1234567890');
+
+    verify(() => mockAuthRepository.refreshToken('refresh123')).called(1);
+    verify(() => mockStorage.saveAccessToken('newAccess')).called(1);
+    verify(() => mockStorage.saveRefreshToken('newRefresh')).called(1);
   });
 }
